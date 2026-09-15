@@ -9,16 +9,14 @@ import (
 
 func GetOS() spotifypb.Os {
 	switch runtime.GOOS {
-	case "android":
-		return spotifypb.Os_OS_ANDROID
+	case "linux", "android":
+		return spotifypb.Os_OS_LINUX
 	case "darwin":
 		return spotifypb.Os_OS_OSX
 	case "freebsd":
 		return spotifypb.Os_OS_FREEBSD
 	case "ios":
 		return spotifypb.Os_OS_IPHONE
-	case "linux":
-		return spotifypb.Os_OS_LINUX
 	case "windows":
 		return spotifypb.Os_OS_WINDOWS
 	default:
@@ -49,8 +47,6 @@ func GetCpuFamily() spotifypb.CpuFamily {
 
 func GetPlatform() spotifypb.Platform {
 	switch runtime.GOOS {
-	case "android":
-		return spotifypb.Platform_PLATFORM_ANDROID_ARM
 	case "darwin":
 		switch runtime.GOARCH {
 		case "386":
@@ -74,7 +70,7 @@ func GetPlatform() spotifypb.Platform {
 		case "arm64":
 			return spotifypb.Platform_PLATFORM_IPHONE_ARM64
 		}
-	case "linux":
+	case "linux", "android":
 		switch runtime.GOARCH {
 		case "386":
 			return spotifypb.Platform_PLATFORM_LINUX_X86
@@ -109,12 +105,6 @@ func GetPlatform() spotifypb.Platform {
 
 func GetPlatformSpecificData() *clienttokenpb.PlatformSpecificData {
 	switch runtime.GOOS {
-	case "android":
-		return &clienttokenpb.PlatformSpecificData{
-			Data: &clienttokenpb.PlatformSpecificData_Android{
-				Android: &clienttokenpb.NativeAndroidData{},
-			},
-		}
 	case "darwin":
 		return &clienttokenpb.PlatformSpecificData{
 			Data: &clienttokenpb.PlatformSpecificData_DesktopMacos{
@@ -127,7 +117,7 @@ func GetPlatformSpecificData() *clienttokenpb.PlatformSpecificData {
 				Ios: &clienttokenpb.NativeIOSData{},
 			},
 		}
-	case "linux", "freebsd":
+	case "linux", "freebsd", "android":
 		return &clienttokenpb.PlatformSpecificData{
 			Data: &clienttokenpb.PlatformSpecificData_DesktopLinux{
 				DesktopLinux: &clienttokenpb.NativeDesktopLinuxData{},

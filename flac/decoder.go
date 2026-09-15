@@ -1,3 +1,5 @@
+//go:build librespot_decoders
+
 package flac
 
 import (

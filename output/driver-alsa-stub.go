@@ -1,4 +1,4 @@
-//go:build android || darwin || js || windows || nintendosdk
+//go:build !librespot_alsa
 
 package output
 

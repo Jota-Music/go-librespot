@@ -50,7 +50,11 @@ func VersionString() string {
 }
 
 func SystemInfoString() string {
-	return fmt.Sprintf("%s; Go %s (%s %s)", VersionString(), runtime.Version(), runtime.GOOS, runtime.GOARCH)
+	os := runtime.GOOS
+	if os == "android" {
+		os = "linux"
+	}
+	return fmt.Sprintf("%s; Go %s (%s %s)", VersionString(), runtime.Version(), os, runtime.GOARCH)
 }
 
 func UserAgent() string {
