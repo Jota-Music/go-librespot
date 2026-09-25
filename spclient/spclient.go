@@ -477,6 +477,15 @@ func (c *Spclient) PlaylistSignals(ctx context.Context, playlist librespot.Spoti
 	return &protoResp, nil
 }
 
+func (c *Spclient) Search(ctx context.Context, query string) (*connectpb.Context, error) {
+	query = strings.TrimSpace(query)
+	if query == "" {
+		return nil, fmt.Errorf("search query is required")
+	}
+
+	return c.ContextResolve(ctx, "spotify:search:"+url.QueryEscape(query))
+}
+
 func (c *Spclient) ContextResolve(ctx context.Context, uri string) (*connectpb.Context, error) {
 	if librespot.InferSpotifyIdTypeFromContextUri(uri) == librespot.SpotifyIdTypeUnknown {
 		return nil, fmt.Errorf("unsupported context type: %s", uri)

@@ -23,11 +23,12 @@ import (
 // recordedRequest is what the stub endpoint saw, so tests can assert on the
 // headers, query and body the client actually put on the wire.
 type recordedRequest struct {
-	method string
-	path   string
-	query  url.Values
-	header http.Header
-	body   []byte
+	method  string
+	path    string
+	rawPath string
+	query   url.Values
+	header  http.Header
+	body    []byte
 }
 
 type RequestSuite struct {
@@ -63,11 +64,12 @@ func (suite *RequestSuite) SetupTest() {
 		suite.mu.Lock()
 		attempt := len(suite.received)
 		suite.received = append(suite.received, recordedRequest{
-			method: r.Method,
-			path:   r.URL.Path,
-			query:  r.URL.Query(),
-			header: r.Header.Clone(),
-			body:   body,
+			method:  r.Method,
+			path:    r.URL.Path,
+			rawPath: r.URL.EscapedPath(),
+			query:   r.URL.Query(),
+			header:  r.Header.Clone(),
+			body:    body,
 		})
 		handler := suite.handler
 		suite.mu.Unlock()
@@ -127,6 +129,28 @@ func (suite *RequestSuite) TestSendsAuthAndClientTokenHeaders() {
 	suite.Equal("/some/path", got[0].path)
 	suite.Equal("Bearer cached-token", got[0].header.Get("Authorization"))
 	suite.Equal("client-token", got[0].header.Get("Client-Token"))
+}
+
+func (suite *RequestSuite) TestSearchEncodesQuery() {
+	suite.handler = func(_ int, w http.ResponseWriter) {
+		_, _ = w.Write([]byte(`{"uri":"spotify:search:Daft+Punk+%26+Discovery"}`))
+	}
+
+	search, err := suite.spclient.Search(suite.T().Context(), "  Daft Punk & Discovery  ")
+	suite.Require().NoError(err)
+	suite.Equal("spotify:search:Daft+Punk+%26+Discovery", search.Uri)
+
+	got := suite.requests()
+	suite.Require().Len(got, 1)
+	suite.Equal("GET", got[0].method)
+	suite.Equal("/context-resolve/v1/spotify:search:Daft+Punk+%26+Discovery", got[0].rawPath)
+}
+
+func (suite *RequestSuite) TestSearchRejectsBlankQuery() {
+	_, err := suite.spclient.Search(suite.T().Context(), " \t ")
+	suite.Require().Error(err)
+	suite.Contains(err.Error(), "search query is required")
+	suite.Empty(suite.requests())
 }
 
 // A body implies protobuf on this API, and the content type has to say so.

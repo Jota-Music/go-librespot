@@ -44,6 +44,7 @@ func TestInferSpotifyIdTypeTrackContexts(t *testing.T) {
 		"spotify:playlist:37i9dQZF1E36KLdUfLiuUo",
 		"spotify:track:2FY7b99s15jUprqC0M5NCT",
 		"spotify:station:playlist:37i9dQZF1E36KLdUfLiuUo",
+		"spotify:search:Daft+Punk",
 		"spotify:dailymix:xxx",
 		"spotify:collection:tracks",
 		"spotify:user:someone:playlist:37i9dQZF1E36KLdUfLiuUo",
